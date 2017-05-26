@@ -10,7 +10,7 @@ select yn in "${options[@]}"; do
     case $yn in
         All ) eval "wget --mirror --no-host-directories --cut-dirs=5 --no-verbose --show-progress --no-parent -R '*\?C=*' --recursive $NEAR_URL";
             break;;
-        2001 ) eval "wget -r -N -l inf -nH --cut-dirs=5 -nv --show-progress -R '*\?C=*' -i urls_nearsp_1000_2001.txt";
+        2001 ) eval "wget -r -N -l inf -nH --cut-dirs=5 -nv --show-progress -i urls_nearsp_1000_2001.txt";
             break;;
         Quit ) exit;;
     esac
