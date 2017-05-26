@@ -31,3 +31,4 @@ $ conda create --name environment_name --file spec-file.tx
 * [NEAR](https://sbn.psi.edu/pds/resource/near/)
 * [Hyabusa](https://sbn.psi.edu/pds/archive/hayabusa.html)
 * [SBD Image Viewer](http://sbib.psi.edu/) - sweet tool to look at images from Vesta and Eros
+* [NEAR landing imagery](http://sbib.psi.edu/PDS-Eros/Landing/2001-043-MSI/frame/) - directory with NEAR landing phase imagery
