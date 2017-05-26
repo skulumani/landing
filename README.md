@@ -24,3 +24,10 @@ $ conda list --explicit > spec-file.txt
 * Import this file on the same platform (`conda` does not check this! )
 ~~~
 $ conda create --name environment_name --file spec-file.tx
+
+
+## Data sources
+
+* [NEAR](https://sbn.psi.edu/pds/resource/near/)
+* [Hyabusa](https://sbn.psi.edu/pds/archive/hayabusa.html)
+
