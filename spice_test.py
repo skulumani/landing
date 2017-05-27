@@ -34,23 +34,29 @@ def download_cassini_spice():
             urlretrieve(url, fullfilename)
         spice.furnsh(fullfilename)
 
-def near_test():
+def near_state():
     near_id = '-93'
     eros_id = '2000433'
-
+    
+    spice.furnsh('./near_2001.tm')
     step = 1000
     utc = ['Feb 12, 2001 12:00:00', 'Feb 12, 2001 20:05:00']
     etOne = spice.str2et(utc[0])
     etTwo = spice.str2et(utc[1])
 
     times = np.linspace(etOne, etTwo, step)
-
-    positions, lightTimes = spice.spkpos(near_id, times, 'J2000', 'None', eros_id)
-
+    istate = np.zeros((step, 6))
+    astate = np.zeros((step, 6))
+    ilt = np.zeros_like(times)
+    alt = np.zeros_like(times)
+    for (ii, et) in enumerate(times):
+        istate[ii,:], ilt[ii] = spice.spkezr(near_id, et, 'J2000', 'None', eros_id)
+        astate[ii,:], alt[ii] = spice.spkezr(near_id, et, 'IAU_EROS', 'None', eros_id)
+    
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.scatter(positions[:,0], positions[:,1], positions[:,2])
+    ax.scatter(istate[:,0],istate[:,1],istate[:,2])
 
     plt.show()
 if __name__=='__main__':
@@ -69,6 +75,6 @@ if __name__=='__main__':
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.scatter(positions[:,0], positions[:,1], positions[:,2])
+    ax.plot(positions[:,0], positions[:,1], positions[:,2])
 
     plt.show()
