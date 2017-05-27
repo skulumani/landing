@@ -12,29 +12,33 @@ import os
 import pdb
 
 
-def download_spice():
+def download_cassini_spice():
+    kernel_urls = [
+            'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0009.tls',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/sclk/cas00084.tsc',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/pck/cpck05Mar2004.tpc',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v37.tf',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ck/04135_04171pc_psiv2.bc',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v09.ti',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp',
+            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/981005_PLTEPH-DE405S.bsp'
+            ]
     if not os.path.isdir('./cassini'):
         os.mkdir('cassini')
 
-        kernel_urls = [
-                'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0009.tls',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/sclk/cas00084.tsc',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/pck/cpck05Mar2004.tpc',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v37.tf',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ck/04135_04171pc_psiv2.bc',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v09.ti',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp',
-                'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/981005_PLTEPH-DE405S.bsp'
-                ]
-        for url in kernel_urls:
-            filename = url.split('/')[-1]
-            fullfilename = os.path.join('cassini', filename)
+    for url in kernel_urls:
+        filename = url.split('/')[-1]
+        fullfilename = os.path.join('cassini', filename)
+        if not os.path.isfile(fullfilename):
             urlretrieve(url, fullfilename)
-            spice.furnsh(fullfilename)
+        spice.furnsh(fullfilename)
+
+def near_test():
+    utc = ['Jan 01, 2001', 'Feb 28, 2001']
 
 if __name__=='__main__':
-    download_spice()
+    download_cassini_spice()
     step = 4000
     utc = ['Jun 20, 2004', 'Dec 1, 2005']
 

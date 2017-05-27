@@ -24,7 +24,7 @@ KPL/MK
    \begindata
  
       PATH_VALUES     = (
-                         './data'
+                         './nearsp_1000/data'
                         )
  
       PATH_SYMBOLS    = (
