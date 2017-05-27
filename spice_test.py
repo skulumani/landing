@@ -35,8 +35,24 @@ def download_cassini_spice():
         spice.furnsh(fullfilename)
 
 def near_test():
-    utc = ['Jan 01, 2001', 'Feb 28, 2001']
+    near_id = '-93'
+    eros_id = '2000433'
 
+    step = 1000
+    utc = ['Feb 12, 2001 12:00:00', 'Feb 12, 2001 20:05:00']
+    etOne = spice.str2et(utc[0])
+    etTwo = spice.str2et(utc[1])
+
+    times = np.linspace(etOne, etTwo, step)
+
+    positions, lightTimes = spice.spkpos(near_id, times, 'J2000', 'None', eros_id)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.scatter(positions[:,0], positions[:,1], positions[:,2])
+
+    plt.show()
 if __name__=='__main__':
     download_cassini_spice()
     step = 4000
