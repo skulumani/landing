@@ -34,3 +34,11 @@ $ conda create --name environment_name --file spec-file.tx
 * [Hyabusa](https://sbn.psi.edu/pds/archive/hayabusa.html)
 * [SBD Image Viewer](http://sbib.psi.edu/) - sweet tool to look at images from Vesta and Eros
 * [NEAR landing imagery](http://sbib.psi.edu/PDS-Eros/Landing/2001-043-MSI/frame/) - directory with NEAR landing phase imagery
+* [SPICE Archives](https://naif.jpl.nasa.gov/naif/data_archived.html)
+
+## SPICE Documenation
+
+* [Body ID Codes](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html)
+* [SPK Required reading](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/spk.html#Integer%20ID%20Codes%20Used%20in%20SPK)
+* [Kernel Required reading](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/kernel.html#Loading Kernels)
+* [Time](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/time.html)
