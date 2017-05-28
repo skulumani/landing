@@ -5,6 +5,8 @@
 import spiceypy as spice
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from astropy.visualization import astropy_mpl_style
+plt.style.use(astropy_mpl_style)
 
 import numpy as np
 from urllib import urlretrieve
@@ -59,6 +61,30 @@ def near_state():
     ax.scatter(istate[:,0],istate[:,1],istate[:,2])
 
     plt.show()
+
+def near_images():
+    """Read NEAR images and test AstroPy
+    """
+    pass
+
+def astropy_fits():
+    """Test reading a fits image
+    """
+    from astropy.utils.data import download_file
+    from astropy.io import fits
+
+    image_file = download_file('http://data.astropy.org/tutorials/FITS-images/HorseHead.fits',
+                            cache=True)   
+
+    fits.info(image_file)
+
+    image_data = fits.getdata(image_file, ext=0)
+
+    print(image_data.shape)
+
+    plt.figure()
+    plt.imshow(image_data, cmap='gray')
+    plt.colorbar()
 if __name__=='__main__':
     download_cassini_spice()
     step = 4000
