@@ -51,8 +51,18 @@ def near_state():
     astate = np.zeros((step, 6))
     ilt = np.zeros_like(times)
     alt = np.zeros_like(times)
+
+    R_sc2int = np.zeros((3, 3, step))
+    R_sc2ast = np.zeros((3, 3, step))
+    R_ast2int = np.zeros((3, 3, step))
+
+    # angular velocities
+    w_sc2int = np.zeros((step, 3))
+    w_sc2ast = np.zeros((step, 3))
+    w_ast2int = np.zeros((step, 3))
     for (ii, et) in enumerate(times):
         istate[ii,:], ilt[ii] = spice.spkezr(near_id, et, 'J2000', 'None', eros_id)
+
         astate[ii,:], alt[ii] = spice.spkezr(near_id, et, 'IAU_EROS', 'None', eros_id)
     
     fig = plt.figure()
