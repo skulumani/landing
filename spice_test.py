@@ -13,7 +13,6 @@ from urllib import urlretrieve
 import os
 import pdb
 
-
 def download_cassini_spice():
     kernel_urls = [
             'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0009.tls',
@@ -40,6 +39,11 @@ def near_state():
     near_id = '-93'
     eros_id = '2000433'
     
+    near_body_frame = 'NEAR_SC_BUS_PRIME'
+    near_body_frame_id = -93000 
+    eros_body_frame = 'IAU_EROS'
+    eros_body_frame_id = 2000433
+
     spice.furnsh('./near_2001.tm')
     step = 1000
     utc = ['Feb 12, 2001 12:00:00', 'Feb 12, 2001 20:05:00']
@@ -60,10 +64,33 @@ def near_state():
     w_sc2int = np.zeros((step, 3))
     w_sc2ast = np.zeros((step, 3))
     w_ast2int = np.zeros((step, 3))
+
+    sc2int_clock = np.zeros(step)
+    sc2ast_clock = np.zeros(step)
+    ast2int_clock = np.zeros(step)
+
     for (ii, et) in enumerate(times):
         istate[ii,:], ilt[ii] = spice.spkezr(near_id, et, 'J2000', 'None', eros_id)
-
         astate[ii,:], alt[ii] = spice.spkezr(near_id, et, 'IAU_EROS', 'None', eros_id)
+        
+        sclk = spice.sce2c(int(near_id), et)
+        # find atttiude states of Eros and NEAR
+        try:
+            R_sc2int[:, :, ii], w_sc2int[ii, :], sc2int_clock[ii] = spice.ckgpav(near_body_frame_id, sclk, 0.0, 'J2000')
+        except:
+            pass
+
+        try:
+            R_sc2ast[:, :, ii], w_sc2ast[ii, :], sc2ast_clock[ii] = spice.ckgpav(near_body_frame_id,
+                    sclk, 0.0, 'IAU_EROS')
+        except:
+            pass
+
+        try:
+            R_ast2int[:, :, ii], w_ast2int[ii, :], ast2int_clock[ii] = spice.ckgpav(eros_body_frame_id, 
+                sclk, 0.0, 'J2000')
+        except:
+            pass
     
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -71,6 +98,8 @@ def near_state():
     ax.scatter(istate[:,0],istate[:,1],istate[:,2])
 
     plt.show()
+
+    spice.kclear()
 
 def near_images():
     """Read NEAR images and test AstroPy
