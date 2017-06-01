@@ -7,14 +7,16 @@ from urllib import urlretrieve
 import os
 import pdb
 
-from spice_test import download_cassini_spice
-
+from .. import kernels
 def test_spiceypy_installation_correct():
     spice_version = 'CSPICE_N0065'
     np.testing.assert_equal(spice.tkvrsn('TOOLKIT'),spice_version)
 
 class TestSpiceyPyFunctions():
-    download_cassini_spice()
+    cass = kernels.CassiniKernels
+    kernels.getKernels(cass)
+    metakernel = kernels.writeMetaKernel(cass, 'cassini.tm')
+    spice.furnsh(metakernel) 
     utc = ['Jun 20, 2004', 'Dec 1, 2005']
 
     etOne = spice.str2et(utc[0])
