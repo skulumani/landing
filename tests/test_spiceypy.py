@@ -41,10 +41,13 @@ class TestSpiceyPyFunctions():
         np.testing.assert_array_almost_equal(Rout, R)
 
 class TestNEARKernels():
-    spice.furnsh('./near_2001.tm')
-    ckid = spice.ckobj('./nearsp_1000/data/ck/near_20010101_20010228_v01.bc')[0]
-    cover = spice.ckcov('./nearsp_1000/data/ck/near_20010101_20010228_v01.bc', 
-            ckid, False, 'INTERVAL', 0.0, 'SCLK')
+    near = kernels.NearKernels
+    kernels.getKernels(near)
+    metakernel = kernels.writeMetaKernel(near, 'near2001.tm')
+
+    spice.furnsh(metakernel)
+    ckid = spice.ckobj(near.Ck)[0]
+    cover = spice.ckcov(near.Ck, ckid, False, 'INTERVAL', 0.0, 'SCLK')
     
     def test_near_body_frames(self):
         """Transformation from Body fixed frame to prime frame
