@@ -4,49 +4,30 @@
 
 import spiceypy as spice
 import matplotlib.pyplot as plt
+from matplotlib.animation import ArtistAnimation, FuncAnimation
+
 from mpl_toolkits.mplot3d import Axes3D
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 
-import numpy as np
-from urllib import urlretrieve
+import cv2
+from astropy.utils.data import download_file
+from astropy.io import fits
+
 import os
+import numpy as np
 import pdb
 
-def download_cassini_spice():
-    kernel_urls = [
-            'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0009.tls',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/sclk/cas00084.tsc',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/pck/cpck05Mar2004.tpc',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v37.tf',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ck/04135_04171pc_psiv2.bc',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v09.ti',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp',
-            'http://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/981005_PLTEPH-DE405S.bsp'
-            ]
-    if not os.path.isdir('./cassini'):
-        os.mkdir('cassini')
-
-    for url in kernel_urls:
-        filename = url.split('/')[-1]
-        fullfilename = os.path.join('cassini', filename)
-        if not os.path.isfile(fullfilename):
-            urlretrieve(url, fullfilename)
-        spice.furnsh(fullfilename)
+import kernels
 
 def near_state():
-    near_id = '-93'
-    eros_id = '2000433'
-    
-    near_body_frame = 'NEAR_SC_BUS_PRIME'
-    near_body_frame_id = -93000 
-    eros_body_frame = 'IAU_EROS'
-    eros_body_frame_id = 2000433
+    near = kernels.NearKernels
+    kernels.getKernels(near)
+    metakernel = kernels.writeMetaKernel(near)
 
-    spice.furnsh('./near_2001.tm')
+    spice.furnsh(metakernel)
     step = 1000
-    utc = ['Feb 12, 2001 12:00:00', 'Feb 12, 2001 20:05:00']
+    utc = ['Feb 12, 2001 12:00:00 UTC', 'Feb 12, 2001 20:05:00 UTC']
     etOne = spice.str2et(utc[0])
     etTwo = spice.str2et(utc[1])
 
@@ -70,25 +51,25 @@ def near_state():
     ast2int_clock = np.zeros(step)
 
     for (ii, et) in enumerate(times):
-        istate[ii,:], ilt[ii] = spice.spkezr(near_id, et, 'J2000', 'None', eros_id)
-        astate[ii,:], alt[ii] = spice.spkezr(near_id, et, 'IAU_EROS', 'None', eros_id)
+        istate[ii,:], ilt[ii] = spice.spkezr(near.near_id, et, near.inertial_frame, 'None', near.eros_id)
+        astate[ii,:], alt[ii] = spice.spkezr(near.near_id, et, near.eros_body_frame, 'None', near.eros_id)
         
-        sclk = spice.sce2c(int(near_id), et)
+        sclk = spice.sce2c(int(near.near_id), et)
         # find atttiude states of Eros and NEAR
         try:
-            R_sc2int[:, :, ii], w_sc2int[ii, :], sc2int_clock[ii] = spice.ckgpav(near_body_frame_id, sclk, 0.0, 'J2000')
+            R_sc2int[:, :, ii], w_sc2int[ii, :], sc2int_clock[ii] = spice.ckgpav(near.near_body_frame_id, sclk, 0.0, near.inertial_frame)
         except:
             pass
 
         try:
-            R_sc2ast[:, :, ii], w_sc2ast[ii, :], sc2ast_clock[ii] = spice.ckgpav(near_body_frame_id,
-                    sclk, 0.0, 'IAU_EROS')
+            R_sc2ast[:, :, ii], w_sc2ast[ii, :], sc2ast_clock[ii] = spice.ckgpav(near.near_body_frame_id,
+                    sclk, 0.0, near.eros_body_frame)
         except:
             pass
 
         try:
-            R_ast2int[:, :, ii], w_ast2int[ii, :], ast2int_clock[ii] = spice.ckgpav(eros_body_frame_id, 
-                sclk, 0.0, 'J2000')
+            R_ast2int[:, :, ii], w_ast2int[ii, :], ast2int_clock[ii] = spice.ckgpav(near.eros_body_frame_id, 
+                sclk, 0.0, near.inertial_frame)
         except:
             pass
     
@@ -101,16 +82,53 @@ def near_state():
 
     spice.kclear()
 
-def near_images():
+def near_image(image_file):
     """Read NEAR images and test AstroPy
     """
-    pass
+    fits.info(image_file, False)
+    image_data = fits.getdata(image_file, ext=0)
+    print(image_data.shape)
 
+    plt.figure()
+    plt.imshow(image_data, cmap='gray')
+    plt.axis('off')
+    plt.show()
+
+def near_image_flipbook(directory='./images', interval=250):
+    """Flip through all the images in a directory
+    """
+    
+    fit_files = [f for f in os.listdir(directory) if f[-3:] == 'fit']
+    fit_files = sorted(fit_files)
+    fig, ax = plt.subplots()
+    fig.set_tight_layout(True)
+    ax.axis('off')
+
+    ims = []
+    for (ii, f) in enumerate(fit_files):
+        im = ax.imshow(fits.getdata(os.path.join(directory, f), ext=0),
+                cmap='gray')
+        ims.append([im])
+
+    ani = ArtistAnimation(fig, ims, interval=interval, blit=True,
+            repeat_delay=1000)
+
+    return fig, ani
+
+def near_save_gif(gif=False, directory='./images', interval=250):
+    """This will output the animation or save
+    """
+    fig, ani = near_image_flipbook(directory, interval)
+    if gif:
+        ani.save('landing.gif', dpi=100, writer='imagemagick')
+        plt.show()
+    else:
+        print('fig size: {0} DPI, size in inches {1}'.format(
+    fig.get_dpi(), fig.get_size_inches()))
+        plt.show()
 def astropy_fits():
     """Test reading a fits image
     """
-    from astropy.utils.data import download_file
-    from astropy.io import fits
 
     image_file = download_file('http://data.astropy.org/tutorials/FITS-images/HorseHead.fits',
                             cache=True)   
@@ -124,22 +142,5 @@ def astropy_fits():
     plt.figure()
     plt.imshow(image_data, cmap='gray')
     plt.colorbar()
-if __name__=='__main__':
-    download_cassini_spice()
-    step = 4000
-    utc = ['Jun 20, 2004', 'Dec 1, 2005']
-
-    etOne = spice.str2et(utc[0])
-    etTwo = spice.str2et(utc[1])
-    print("ET One: {}, ET Two: {}".format(etOne, etTwo))
-
-    times = [x*(etTwo-etOne)/step + etOne for x in range(step)]
-
-    positions, lightTimes = spice.spkpos('Cassini', times, 'J2000', 'None', 'SATURN BARYCENTER')
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax.plot(positions[:,0], positions[:,1], positions[:,2])
-
     plt.show()
+
