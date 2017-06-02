@@ -32,6 +32,16 @@ class NearKernels(object):
     More data on Near is available:
     https://pdssbn.astro.umd.edu/data_sb/missions/near/index.shtml
     """
+    near_id = '-93'
+    eros_id = '2000433'
+    
+    near_body_frame = 'NEAR_SC_BUS_PRIME'
+    near_body_frame_id = -93000 
+    eros_body_frame = 'IAU_EROS'
+    eros_body_frame_id = 2000433
+
+    inertial_frame = 'J2000'
+    
     Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
     Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ck/near_20010101_20010228_v01.bc'
     Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/sclk/near_171.tsc'
