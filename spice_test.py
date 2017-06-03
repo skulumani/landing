@@ -1,7 +1,7 @@
 """Test the Python SPICE functionality by plotting NEAR
 
 """
-
+from __future__ import absolute_import, division, print_function, unicode_literals
 import spiceypy as spice
 import matplotlib.pyplot as plt
 from matplotlib.animation import ArtistAnimation, FuncAnimation
