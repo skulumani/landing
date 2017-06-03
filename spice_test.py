@@ -18,15 +18,14 @@ import os
 import numpy as np
 import pdb
 
-import kernels
+from . import kernels
 
 def near_state():
-    near = kernels.NearKernels
-    kernels.getKernels(near)
-    metakernel = kernels.writeMetaKernel(near)
+    near = kernels.NearKernels()
+    near.info()
 
-    spice.furnsh(metakernel)
-    step = 1000
+    spice.furnsh(near.metakernel)
+    step = 10000
     utc = ['Feb 12, 2001 12:00:00 UTC', 'Feb 12, 2001 20:05:00 UTC']
     etOne = spice.str2et(utc[0])
     etTwo = spice.str2et(utc[1])
@@ -72,15 +71,18 @@ def near_state():
                 sclk, 0.0, near.inertial_frame)
         except:
             pass
-    
+
+    # concatonate the states together
+    inertial_state = np.hstack((istate, R_sc2int.reshape((-1, 9)), w_sc2int))
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
     ax.scatter(istate[:,0],istate[:,1],istate[:,2])
-
     plt.show()
-
     spice.kclear()
+
+    return times, inertial_state
+
 
 def near_image(image_file):
     """Read NEAR images and test AstroPy
