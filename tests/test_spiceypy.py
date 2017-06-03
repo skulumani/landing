@@ -13,10 +13,8 @@ def test_spiceypy_installation_correct():
     np.testing.assert_equal(spice.tkvrsn('TOOLKIT'),spice_version)
 
 class TestSpiceyPyFunctions():
-    cass = kernels.CassiniKernels
-    kernels.getKernels(cass)
-    metakernel = kernels.writeMetaKernel(cass, 'cassini.tm')
-    spice.furnsh(metakernel) 
+    cass = kernels.CassiniKernels()
+    spice.furnsh(cass.metakernel) 
     utc = ['Jun 20, 2004', 'Dec 1, 2005']
 
     etOne = spice.str2et(utc[0])
@@ -41,7 +39,7 @@ class TestSpiceyPyFunctions():
         np.testing.assert_array_almost_equal(Rout, R)
 
 class TestNEARKernels():
-    near = kernels.NearKernels
+    near = kernels.NearKernels()
     kernels.getKernels(near)
     metakernel = kernels.writeMetaKernel(near, 'near2001.tm')
 
