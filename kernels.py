@@ -46,12 +46,14 @@ class NearKernels(object):
         
         self.near_body_frame = 'NEAR_SC_BUS_PRIME'
         self.near_body_frame_id = -93000 
+        self.near_msi_frame = 'NEAR_MSI'
+        self.near_msi_frame_id = -93001
         self.eros_body_frame = 'IAU_EROS'
         self.eros_body_frame_id = 2000433
 
         self.inertial_frame = 'J2000'
         
-        self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
+        self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0008.tls'
         self.Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ck/near_20010101_20010228_v01.bc'
         self.Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/sclk/near_171.tsc'
 
@@ -114,10 +116,7 @@ class NearKernels(object):
                 self.SpkNearOrbit, self.SpkStations]
 
         self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
-        
-
         self.kernelDescription = 'Metal Kernel for 2001 NEAR orbit and landing'
-
         getKernels(self)
         self.metakernel = writeMetaKernel(self, 'near2001.tm')
 
@@ -209,13 +208,10 @@ def cleanupKernels(kernelObj=CassiniKernels):
     """Delete all the Kernels
     """
     for kernel in kernelObj.kernelList:
-        path = os.path.join(cwd, directory, kernel)
-        if os.path.exists(path):
-            os.remove(path)
-            return 0
+        if os.path.exists(kernel):
+            os.remove(kernel)
         else:
-            print("Path doesn't exist")
-            return 1
+            print("Path doesn't exist: {}".format(kernel))
 
 
 def attemptDownload(url, kernelName, targetFileName, num_attempts=5):
