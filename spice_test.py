@@ -88,7 +88,8 @@ def near_image(image_file):
     """
     fits.info(image_file, False)
     image_data = fits.getdata(image_file, ext=0)
-    print(image_data.shape)
+
+    # extract NEAR data at this image time
 
     plt.figure()
     plt.imshow(image_data, cmap='gray')
