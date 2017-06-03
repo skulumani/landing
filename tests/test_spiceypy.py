@@ -41,10 +41,34 @@ class TestSpiceyPyFunctions():
 
 class TestNEARKernels():
     near = kernels.NearKernels()
-    kernels.getKernels(near)
-    metakernel = kernels.writeMetaKernel(near, 'near2001.tm')
+    
+    def test_msi_frame_transformation(self):
+        """Check the frame at a specific time
+        """
+        spice.kclear()
+        spice.furnsh(self.near.metakernel)
 
-    spice.furnsh(metakernel)
+        utc = ['Feb 10, 2001 12:00:00 UTC']
+        et = spice.str2et(utc)
+        
+        R_b2c = spice.pxform(self.near.near_body_frame,
+                self.near.near_msi_frame, et)
+        R_b2c_actual = np.array([
+            [.9999988429, -.0004838414, .0014422523],
+            [.0004838419, .9999998829, .0000000000],
+            [-.0014422522, .0000006978, .9999989600]])
+        spice.kclear()
+        np.testing.assert_array_almost_equal(R_b2c, R_b2c_actual)
+    
+    def test_near_landing_coverage(self):
+        spice.furnsh(self.near.metakernel)
+        utc = ['Feb 12, 2001 12:00:00 UTC', 'Feb 12, 2001 20:05:00 UTC']
+        etone = 35251264.18507089
+        ettwo = 35280364.18507829
+        np.testing.assert_almost_equal(spice.str2et(utc[0]), etone)
+        np.testing.assert_almost_equal(spice.str2et(utc[1]), ettwo)
+        spice.kclear()
+        
     # ckid = spice.ckobj(near.Ck)[0]
     # cover = spice.ckcov(near.Ck, ckid, False, 'INTERVAL', 0.0, 'SCLK')
     
