@@ -3,12 +3,15 @@
 import os
 import time
 from urllib import urlretrieve
+import pdb
+import spiceypy as spice
 
 cwd = os.path.realpath(os.path.dirname(__file__))
 directory = 'kernels'
 
 if not os.path.isdir(directory):
     os.mkdir(directory)
+
 
 def getKernelNameFromUrl(url):
     """Extract the Kernal name from a URL
@@ -32,112 +35,172 @@ class NearKernels(object):
     More data on Near is available:
     https://pdssbn.astro.umd.edu/data_sb/missions/near/index.shtml
     """
-    near_id = '-93'
-    eros_id = '2000433'
+
+    def __init__(self):
+        """Construct all the member variables for NEAR
+        """
+        self.near_id = '-93'
+        self.eros_id = '2000433'
+        
+        self.near_body_frame = 'NEAR_SC_BUS_PRIME'
+        self.near_body_frame_id = -93000 
+        self.eros_body_frame = 'IAU_EROS'
+        self.eros_body_frame_id = 2000433
+
+        self.inertial_frame = 'J2000'
+        
+        self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
+        self.Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ck/near_20010101_20010228_v01.bc'
+        self.Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/sclk/near_171.tsc'
+
+        self.PckEros1_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/pck/erosatt_1998329_2001157_v01.bpc'
+        self.PckEros2_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/pck/erosatt_1999304_2001151.bpc'
+        self.Pck3_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/pck/pck00010.tpc'
+
+        self.Fk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/fk/eros_fixed.tf'
+
+        self.Ikgrs_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/grs12.ti'
+        self.Ikmsi_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/msi15.ti'
+        self.Iknis_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/nis14.ti'
+        self.Iknlr_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/nlr04.ti'
+        self.Ikxrs_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/xrs12.ti'
     
-    near_body_frame = 'NEAR_SC_BUS_PRIME'
-    near_body_frame_id = -93000 
-    eros_body_frame = 'IAU_EROS'
-    eros_body_frame_id = 2000433
+        self.SpkPlanet_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/de403s.bsp'
+        self.SpkEros_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/eros80.bsp'
+        self.SpkEros2_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/erosephem_1999004_2002181.bsp'
+        self.SpkMath_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/math9749.bsp'
+        self.SpkNearLanded_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/near_eroslanded_nav_v1.bsp'
+        self.SpkNearOrbit_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/near_erosorbit_nav_v1.bsp'
+        self.SpkStations_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/stations.bsp'
 
-    inertial_frame = 'J2000'
+        # get the path for each kernel
+        self.Lsk = getPathfromUrl(self.Lsk_url)
+        self.Ck = getPathfromUrl(self.Ck_url)
+        self.Sclk = getPathfromUrl(self.Sclk_url)
+
+        self.PckEros1 = getPathfromUrl(self.PckEros1_url)
+        self.PckEros2 = getPathfromUrl(self.PckEros2_url) 
+        self.Pck3 = getPathfromUrl(self.Pck3_url) 
+
+        self.Fk = getPathfromUrl(self.Fk_url) 
+
+        self.Ikgrs = getPathfromUrl(self.Ikgrs_url)
+        self.Ikmsi = getPathfromUrl(self.Ikmsi_url)
+        self.Iknis = getPathfromUrl(self.Iknis_url)
+        self.Iknlr = getPathfromUrl(self.Iknlr_url)
+        self.Ikxrs = getPathfromUrl(self.Ikxrs_url)
     
-    Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
-    Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ck/near_20010101_20010228_v01.bc'
-    Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/sclk/near_171.tsc'
+        self.SpkPlanet = getPathfromUrl(self.SpkPlanet_url)
+        self.SpkEros = getPathfromUrl(self.SpkEros_url)
+        self.SpkEros2 = getPathfromUrl(self.SpkEros2_url)
+        self.SpkMath = getPathfromUrl(self.SpkMath_url)
+        self.SpkNearLanded = getPathfromUrl(self.SpkNearLanded_url)
+        self.SpkNearOrbit = getPathfromUrl(self.SpkNearOrbit_url)
+        self.SpkStations = getPathfromUrl(self.SpkStations_url)
+        
+        self.urlList = [self.Lsk_url, self.Ck_url, self.Sclk_url, self.Pck3_url, 
+                self.PckEros1_url, self.PckEros2_url, self.Fk_url,
+                self.Ikgrs_url, self.Ikmsi_url, self.Iknis_url, self.Iknlr_url, 
+                self.Ikxrs_url, self.SpkPlanet_url, self.SpkEros_url, 
+                self.SpkEros2_url, self.SpkMath_url, self.SpkNearLanded_url, 
+                self.SpkNearOrbit_url, self.SpkStations_url]
 
-    PckEros1_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/pck/erosatt_1998329_2001157_v01.bpc'
-    PckEros2_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/pck/erosatt_1999304_2001151.bpc'
-    Pck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/pck/pck00010.tpc'
+        self.kernelList = [self.Lsk, self.Ck, self.Sclk, self.Pck3, self.PckEros1, 
+                self.PckEros2, self.Fk, self.Ikgrs, self.Ikmsi, self.Iknis, 
+                self.Iknlr, self.Ikxrs, self.SpkPlanet, self.SpkEros, 
+                self.SpkEros2, self.SpkMath, self.SpkNearLanded, 
+                self.SpkNearOrbit, self.SpkStations]
 
-    Fk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/fk/eros_fixed.tf'
+        self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
+        
 
-    Ikgrs_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/grs12.ti'
-    Ikmsi_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/msi15.ti'
-    Iknis_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/nis14.ti'
-    Iknlr_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/nlr04.ti'
-    Ikxrs_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/xrs12.ti'
-   
-    SpkPlanet_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/de403s.bsp'
-    SpkEros_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/eros80.bsp'
-    SpkEros2_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/erosephem_1999004_2002181.bsp'
-    SpkMath_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/math9749.bsp'
-    SpkNearLanded_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/near_eroslanded_nav_v1.bsp'
-    SpkNearOrbit_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/near_erosorbit_nav_v1.bsp'
-    SpkStations_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/stations.bsp'
+        self.kernelDescription = 'Metal Kernel for 2001 NEAR orbit and landing'
 
-    Lsk = getPathfromUrl(Lsk_url)
-    Ck = getPathfromUrl(Ck_url)
-    Sclk = getPathfromUrl(Sclk_url)
+        getKernels(self)
+        self.metakernel = writeMetaKernel(self, 'near2001.tm')
 
-    PckEros1 = getPathfromUrl(PckEros1_url)
-    PckEros2 = getPathfromUrl(PckEros2_url) 
-    Pck = getPathfromUrl(Pck_url) 
+    def info(self):
+        """Read and Output info about the loaded kernels
+        """
+        spice.kclear()
 
-    Fk = getPathfromUrl(Fk_url) 
+        spice.furnsh(self.metakernel)
 
-    Ikgrs = getPathfromUrl(Ikgrs_url)
-    Ikmsi = getPathfromUrl(Ikmsi_url)
-    Iknis = getPathfromUrl(Iknis_url)
-    Iknlr = getPathfromUrl(Iknlr_url)
-    Ikxrs = getPathfromUrl(Ikxrs_url)
-   
-    SpkPlanet = getPathfromUrl(SpkPlanet_url)
-    SpkEros = getPathfromUrl(SpkEros_url)
-    SpkEros2 = getPathfromUrl(SpkEros2_url)
-    SpkMath = getPathfromUrl(SpkMath_url)
-    SpkNearLanded = getPathfromUrl(SpkNearLanded_url)
-    SpkNearOrbit = getPathfromUrl(SpkNearOrbit_url)
-    SpkStations = getPathfromUrl(SpkStations_url)
-    
-    urlList = [Lsk_url, Ck_url, Sclk_url, Pck_url, PckEros1_url, PckEros2_url, Fk_url,
-               Ikgrs_url, Ikmsi_url, Iknis_url, Iknlr_url, Ikxrs_url,
-               SpkPlanet_url, SpkEros_url, SpkEros2_url, SpkMath_url,
-               SpkNearLanded_url, SpkNearOrbit_url, SpkStations_url]
+        self.spkList = [self.SpkPlanet, self.SpkEros, self.SpkEros2,
+                    self.SpkMath, self.SpkNearLanded, self.SpkNearOrbit,
+                    self.SpkStations]
 
-    kernelList = [Lsk, Ck, Sclk, Pck, PckEros1, PckEros2, Fk,
-               Ikgrs, Ikmsi, Iknis, Iknlr, Ikxrs,
-               SpkPlanet, SpkEros, SpkEros2, SpkMath,
-               SpkNearLanded, SpkNearOrbit, SpkStations]
+        self.ckList = [self.Ck]
+        self.pckList = [self.PckEros1, self.PckEros2]
 
-    nameList = [getKernelNameFromUrl(url) for url in urlList]
+        # check SPK coverage
+        self.bodies = {}
+        for spk in self.spkList:
+            idcell = spice.spkobj(spk)
+            for code in idcell:
+                self.bodies[str(code)] = spice.bodc2n(code)
+                self.bodies[spice.bodc2n(code)] = code
 
-    kernelDescription = 'Metal Kernel for 2001 NEAR orbit and landing'
-    
+        # check CK coverage
+        self.ckframes = {}
+        for ck in self.ckList:
+            idcell = spice.ckobj(ck)
+            for code in idcell:
+                self.ckframes[str(code)] = spice.frmnam(code)
+                self.ckframes[spice.frmnam(code)] = code
+
+        # check pck coverage
+        self.pckframes = {}
+        for pck in self.pckList:
+            ids = spice.stypes.SPICEINT_CELL(1000)
+            spice.pckfrm(pck, ids)
+            for code in ids:
+                self.pckframes[str(code)] = spice.frmnam(code)
+                self.pckframes[spice.frmnam(code)] = code
+
+        spice.kclear()
+        
+
 class CassiniKernels(object):
     """List of urls and kernels for the Cassini mission
 
     More data on Cassini is available:
     https://naif.jpl.nasa.gov/pub/naif/CASSINI/
     """
-    Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
-    Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/sclk/cas00171.tsc'
-    Pck_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/pck/cpck09May2017.tpc'
-    Fk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v40.tf'
-    Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ck/04135_04171pc_psiv2.bc'
-    Spk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/981005_PLTEPH-DE405S.bsp'
-    Ik_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v10.ti'
-    TourSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp'
-    satSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp'
-    
-    Lsk = getPathfromUrl(Lsk_url)
-    Sclk = getPathfromUrl(Sclk_url)
-    Pck = getPathfromUrl(Pck_url)
-    Fk = getPathfromUrl(Fk_url)
-    Ck = getPathfromUrl(Ck_url)
-    Spk = getPathfromUrl(Spk_url)
-    Ik = getPathfromUrl(Ik_url)
-    TourSpk = getPathfromUrl(TourSpk_url)
-    satSpk = getPathfromUrl(satSpk_url)
-    
-    urlList = [Lsk_url, Sclk_url, Pck_url, Fk_url, 
-               Ck_url, Spk_url, Ik_url, TourSpk_url,
-               satSpk_url]
-    kernelList = [Lsk, Sclk, Pck, Fk, Ck,
-                Spk, Ik, TourSpk, satSpk]
-    nameList = [getKernelNameFromUrl(url) for url in urlList]
 
-    kernelDescription = 'Metal Kernel for Cassini Orbiter'
+    def __init__(self):
+        """Initialize the Cassini kernel class
+        """
+        self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
+        self.Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/sclk/cas00171.tsc'
+        self.Pck_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/pck/cpck09May2017.tpc'
+        self.Fk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v40.tf'
+        self.Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ck/04135_04171pc_psiv2.bc'
+        self.Spk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/981005_PLTEPH-DE405S.bsp'
+        self.Ik_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v10.ti'
+        self.TourSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp'
+        self.satSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp'
+        
+        self.Lsk = getPathfromUrl(self.Lsk_url)
+        self.Sclk = getPathfromUrl(self.Sclk_url)
+        self.Pck = getPathfromUrl(self.Pck_url)
+        self.Fk = getPathfromUrl(self.Fk_url)
+        self.Ck = getPathfromUrl(self.Ck_url)
+        self.Spk = getPathfromUrl(self.Spk_url)
+        self.Ik = getPathfromUrl(self.Ik_url)
+        self.TourSpk = getPathfromUrl(self.TourSpk_url)
+        self.satSpk = getPathfromUrl(self.satSpk_url)
+        
+        self.urlList = [self.Lsk_url, self.Sclk_url, self.Pck_url, self.Fk_url, 
+                self.Ck_url, self.Spk_url, self.Ik_url, self.TourSpk_url,
+                self.satSpk_url]
+        self.kernelList = [self.Lsk, self.Sclk, self.Pck, self.Fk, self.Ck,
+                    self.Spk, self.Ik, self.TourSpk, self.satSpk]
+        self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
+
+        self.kernelDescription = 'Metal Kernel for Cassini Orbiter'
+        getKernels(self)
+        self.metakernel = writeMetaKernel(self, 'cassini.tm')
 
 def cleanupKernels(kernelObj=CassiniKernels):
     """Delete all the Kernels
@@ -215,7 +278,4 @@ def writeMetaKernel(kernelObj, filename='testKernel.tm'):
     return os.path.join(cwd, directory, filename)
 
 if __name__ == '__main__':
-    cass = CassiniKernels
-    getKernels(cass)
-    writeMetaKernel(cass, 'cassini.tm')
-    
+    pass 
