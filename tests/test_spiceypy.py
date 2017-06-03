@@ -1,6 +1,7 @@
 """Test SPICEYPY
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 import spiceypy as spice
 import numpy as np
 from urllib import urlretrieve
