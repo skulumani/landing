@@ -59,7 +59,43 @@ class TestNEARKernels():
             [-.0014422522, .0000006978, .9999989600]])
         spice.kclear()
         np.testing.assert_array_almost_equal(R_b2c, R_b2c_actual)
-    
+
+    def test_msi_frame_transformation_fixed(self):
+        spice.kclear()
+        spice.furnsh(self.near.metakernel)
+        etone = spice.str2et('Jan 1, 2001 10:04:02.2 UTC')
+        ettwo = spice.str2et('Feb 12, 2001 18:03:02.6 UTC')
+
+        Rone = spice.pxform(self.near.near_body_frame, 
+                self.near.near_msi_frame, etone)
+        Rtwo = spice.pxform(self.near.near_body_frame,
+                self.near.near_msi_frame, ettwo)
+        np.testing.assert_array_almost_equal(Rone, Rtwo)
+        spice.kclear()
+
+    def test_msi_frame_transpose(self):
+        spice.kclear()
+        spice.furnsh(self.near.metakernel)
+        utc = 'Feb 2, 2001 14:20:10 UTC'
+        et = spice.str2et(utc)
+        Rb2c = spice.pxform(self.near.near_body_frame, 
+                self.near.near_msi_frame, et)
+        Rc2b = spice.pxform(self.near.near_msi_frame,
+                self.near.near_body_frame, et)
+        np.testing.assert_array_almost_equal_nulp(Rb2c, Rc2b.T)
+        spice.kclear()
+
+    def test_msi_boresight_vector(self):
+        spice.kclear()
+        spice.furnsh(self.near.metakernel)
+        bs_near_body = np.array([.9999988429, -.0004838414, .0014422523])
+        bs_msi_frame = np.array([1, 0, 0])
+        et = spice.str2et('Feb 12, 2001 UTC')
+        Rc2b = spice.pxform(self.near.near_msi_frame,
+                self.near.near_body_frame, et)
+        np.testing.assert_array_almost_equal(Rc2b.dot(bs_msi_frame),
+                bs_near_body)
+        spice.kclear()
     def test_near_landing_coverage(self):
         spice.furnsh(self.near.metakernel)
         utc = ['Feb 12, 2001 12:00:00 UTC', 'Feb 12, 2001 20:05:00 UTC']
