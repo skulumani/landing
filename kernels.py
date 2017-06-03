@@ -7,11 +7,12 @@ from urllib import urlretrieve
 import pdb
 import spiceypy as spice
 
+
 cwd = os.path.realpath(os.path.dirname(__file__))
 directory = 'kernels'
 
-if not os.path.isdir(directory):
-    os.mkdir(directory)
+if not os.path.isdir(os.path.join(cwd, directory)):
+    os.mkdir(os.path.join(cwd, directory))
 
 
 def getKernelNameFromUrl(url):
@@ -143,12 +144,13 @@ class NearKernels(object):
                 self.bodies[spice.bodc2n(code)] = code
 
         # check CK coverage
-        self.ckframes = {}
-        for ck in self.ckList:
-            idcell = spice.ckobj(ck)
-            for code in idcell:
-                self.ckframes[str(code)] = spice.frmnam(code)
-                self.ckframes[spice.frmnam(code)] = code
+        # self.ckframes = {}
+        # for ck in self.ckList:
+        #     pdb.set_trace()
+        #     idcell = spice.ckobj(ck)
+        #     for code in idcell:
+        #         self.ckframes[str(code)] = spice.frmnam(code)
+        #         self.ckframes[spice.frmnam(code)] = code
 
         # check pck coverage
         self.pckframes = {}
@@ -274,7 +276,6 @@ def writeMetaKernel(kernelObj, filename='testKernel.tm'):
 
         metaKernel.write(')\n')
         metaKernel.close()
-    print("Finished writing metakernel.")
 
     return os.path.join(cwd, directory, filename)
 
