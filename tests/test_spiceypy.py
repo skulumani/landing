@@ -96,6 +96,7 @@ class TestNEARKernels():
         np.testing.assert_array_almost_equal(Rc2b.dot(bs_msi_frame),
                 bs_near_body)
         spice.kclear()
+
     def test_near_landing_coverage(self):
         spice.furnsh(self.near.metakernel)
         utc = ['Feb 12, 2001 12:00:00 UTC', 'Feb 12, 2001 20:05:00 UTC']
