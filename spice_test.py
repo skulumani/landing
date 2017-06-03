@@ -22,7 +22,6 @@ from . import kernels
 
 def near_state():
     near = kernels.NearKernels()
-    near.info()
 
     spice.furnsh(near.metakernel)
     step = 10000

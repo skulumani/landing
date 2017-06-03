@@ -44,20 +44,20 @@ class TestNEARKernels():
     metakernel = kernels.writeMetaKernel(near, 'near2001.tm')
 
     spice.furnsh(metakernel)
-    ckid = spice.ckobj(near.Ck)[0]
-    cover = spice.ckcov(near.Ck, ckid, False, 'INTERVAL', 0.0, 'SCLK')
+    # ckid = spice.ckobj(near.Ck)[0]
+    # cover = spice.ckcov(near.Ck, ckid, False, 'INTERVAL', 0.0, 'SCLK')
     
-    def test_near_body_frames(self):
-        """Transformation from Body fixed frame to prime frame
-
-        There is a constant rotation of 135 deg about the Z/Third axis
-        """
-        R, av, clkout = spice.ckgpav(self.ckid, self.cover[0], 0, 'NEAR_SC_BUS')
-        ang = 135*np.pi/180
-        R_act = np.array([[np.cos(ang), -np.sin(ang), 0], 
-                          [np.sin(ang), np.cos(ang), 0],
-                          [0, 0, 1]])
-
-        np.testing.assert_array_almost_equal(R, R_act)
-        np.testing.assert_array_almost_equal(av, np.zeros(3))
-        np.testing.assert_almost_equal(clkout, self.cover[0])
+#    def test_near_body_frames(self):
+#        """Transformation from Body fixed frame to prime frame
+# 
+#        There is a constant rotation of 135 deg about the Z/Third axis
+#        """
+#        R, av, clkout = spice.ckgpav(self.ckid, self.cover[0], 0, 'NEAR_SC_BUS')
+#        ang = 135*np.pi/180
+#        R_act = np.array([[np.cos(ang), -np.sin(ang), 0], 
+#                          [np.sin(ang), np.cos(ang), 0],
+#                          [0, 0, 1]])
+# 
+#        np.testing.assert_array_almost_equal(R, R_act)
+#        np.testing.assert_array_almost_equal(av, np.zeros(3))
+#        np.testing.assert_almost_equal(clkout, self.cover[0])
