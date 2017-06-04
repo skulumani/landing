@@ -105,21 +105,67 @@ class TestNEARKernels():
         np.testing.assert_almost_equal(spice.str2et(utc[0]), etone)
         np.testing.assert_almost_equal(spice.str2et(utc[1]), ettwo)
         spice.kclear()
-        
-    # ckid = spice.ckobj(near.Ck)[0]
-    # cover = spice.ckcov(near.Ck, ckid, False, 'INTERVAL', 0.0, 'SCLK')
-    
-#    def test_near_body_frames(self):
-#        """Transformation from Body fixed frame to prime frame
-# 
-#        There is a constant rotation of 135 deg about the Z/Third axis
-#        """
-#        R, av, clkout = spice.ckgpav(self.ckid, self.cover[0], 0, 'NEAR_SC_BUS')
-#        ang = 135*np.pi/180
-#        R_act = np.array([[np.cos(ang), -np.sin(ang), 0], 
-#                          [np.sin(ang), np.cos(ang), 0],
-#                          [0, 0, 1]])
-# 
-#        np.testing.assert_array_almost_equal(R, R_act)
-#        np.testing.assert_array_almost_equal(av, np.zeros(3))
-#        np.testing.assert_almost_equal(clkout, self.cover[0])
+
+    def test_near_body_frames(self):
+        """Transformation from Body fixed frame to prime frame
+
+        There is a constant rotation of 135 deg about the Z/Third axis
+        """
+        spice.furnsh(self.near.metakernel)
+
+        ckid = spice.ckobj(self.near.Ck)[0]
+        cover = spice.ckcov(self.near.Ck, ckid, False, 'INTERVAL', 0.0, 'SCLK') 
+        R, av, clkout = spice.ckgpav(ckid, cover[0], 0, 'NEAR_SC_BUS')
+        ang = 135*np.pi/180
+        R_act = np.array([[np.cos(ang), -np.sin(ang), 0], 
+            [np.sin(ang), np.cos(ang), 0],
+            [0, 0, 1]])
+
+        np.testing.assert_array_almost_equal(R, R_act)
+        np.testing.assert_array_almost_equal(av, np.zeros(3))
+        np.testing.assert_almost_equal(clkout, cover[0])
+        spice.kclear()
+
+    def test_earth_spk_coverage(self):
+        spice.furnsh(self.near.metakernel)
+        spkids = spice.spkobj(self.near.SpkPlanet)
+        cover = spice.stypes.SPICEDOUBLE_CELL(1000)
+        spice.spkcov(self.near.SpkPlanet, 399, cover)
+        result = [x for x in cover]
+        expected_result = [-633873600.0, 347630400.0] 
+        np.testing.assert_array_almost_equal(result, expected_result)
+        spice.kclear()
+
+    def test_eros_spk1_coverage(self):
+        spice.furnsh(self.near.metakernel)
+        code = spice.bodn2c('EROS')
+        cover = spice.stypes.SPICEDOUBLE_CELL(1000)
+        spice.spkcov(self.near.SpkEros, code, cover)
+        result = [x for x in cover]
+        expected_result = [-126273600.0, 37886400.0]
+        np.testing.assert_array_almost_equal(result, expected_result)
+        spice.kclear()
+
+    def test_eros_spk2_coverage(self):
+        code = spice.bodn2c('EROS')
+        cover = spice.stypes.SPICEDOUBLE_CELL(1000)
+        spice.spkcov(self.near.SpkEros2, code, cover)
+        result = [x for x in cover]
+        expected_result = [-31334400.0, 81432000.0] 
+        np.testing.assert_array_almost_equal(result, expected_result)
+
+    def test_near_spk_landed_coverage(self):
+        code = spice.bodn2c('NEAR')
+        cover = spice.stypes.SPICEDOUBLE_CELL(1000)
+        spice.spkcov(self.near.SpkNearLanded, code, cover)
+        result = [x for x in cover]
+        expected_result = [35279120.0, 315576000.0]
+        np.testing.assert_array_almost_equal(result, expected_result)
+
+    def test_near_spk_orbit_coverage(self):
+        code = spice.bodn2c('NEAR')
+        cover = spice.stypes.SPICEDOUBLE_CELL(1000)
+        spice.spkcov(self.near.SpkNearOrbit, code, cover)
+        result = [x for x in cover]
+        expected_result = [-43200.0, 35279120.0] 
+        np.testing.assert_array_almost_equal(result, expected_result)
