@@ -16,8 +16,8 @@ except ImportError:
 cwd = os.path.realpath(os.path.dirname(__file__))
 directory = 'images'
 
-if not os.path.isdir(directory):
-    os.mkdir(directory)
+if not os.path.isdir(os.path.join(cwd,directory)):
+    os.mkdir(os.path.join(cwd,directory))
 
 def getNearMSI(year='2001', day='043'):
     """Download all the MSI imagery from a specific day of flight
