@@ -22,7 +22,6 @@ from . import kernels
 
 def near_state():
     near = kernels.NearKernels()
-
     spice.furnsh(near.metakernel)
     step = 10000
     utc = ['Feb 12, 2001 12:00:00 UTC', 'Feb 12, 2001 20:05:00 UTC']
@@ -35,10 +34,11 @@ def near_state():
     ilt = np.zeros_like(times)
     alt = np.zeros_like(times)
 
+
     R_sc2int = np.zeros((3, 3, step))
     R_sc2ast = np.zeros((3, 3, step))
     R_ast2int = np.zeros((3, 3, step))
-
+    
     # angular velocities
     w_sc2int = np.zeros((step, 3))
     w_sc2ast = np.zeros((step, 3))
