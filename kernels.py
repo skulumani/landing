@@ -128,28 +128,36 @@ class NearKernels(object):
         spice.furnsh(self.metakernel)
 
         self.spkList = [self.SpkPlanet, self.SpkEros, self.SpkEros2,
-                    self.SpkMath, self.SpkNearLanded, self.SpkNearOrbit,
-                    self.SpkStations]
+                self.SpkMath, self.SpkNearLanded, self.SpkNearOrbit,
+                self.SpkStations]
 
         self.ckList = [self.Ck]
         self.pckList = [self.PckEros1, self.PckEros2]
 
         # check SPK coverage
         self.bodies = {}
+        self.bodies_coverage = {}
         for spk in self.spkList:
             idcell = spice.spkobj(spk)
             for code in idcell:
+                cover = spice.stypes.SPICEDOUBLE_CELL(1000)
+                spice.spkcov(spk, code, cover)
                 self.bodies[str(code)] = spice.bodc2n(code)
                 self.bodies[spice.bodc2n(code)] = code
+                self.bodies_coverage[str(code)] = [x for x in cover]
+                self.bodies_coverage[spice.bodc2n(code)] = [x for x in cover]
 
         # check CK coverage
-        # self.ckframes = {}
-        # for ck in self.ckList:
-        #     pdb.set_trace()
-        #     idcell = spice.ckobj(ck)
-        #     for code in idcell:
-        #         self.ckframes[str(code)] = spice.frmnam(code)
-        #         self.ckframes[spice.frmnam(code)] = code
+        self.ckframes = {}
+        self.ckframes_coverage = {}
+        for ck in self.ckList:
+            idcell = spice.ckobj(ck)
+            for code in idcell:
+                cover = spice.ckcov(ck, code, True, 'SEGMENT', 0.0, 'TDB')
+                self.ckframes[str(code)] = spice.frmnam(code)
+                self.ckframes[spice.frmnam(code)] = code
+                self.ckframes_coverage[str(code)] = [x for x in cover]
+                self.ckframes_coverage[spice.frmnam(code)] = [x for x in cover]
 
         # check pck coverage
         self.pckframes = {}
