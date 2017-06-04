@@ -18,12 +18,12 @@ if not os.path.isdir(os.path.join(cwd, directory)):
 def getKernelNameFromUrl(url):
     """Extract the Kernal name from a URL
     """
-    return url.split('/')[-1]
+    return str(url.split('/')[-1])
 
 def getPathfromUrl(url):
     """Extract the path from the url
     """
-    return os.path.join(cwd, directory, getKernelNameFromUrl(url))
+    return str(os.path.join(cwd, directory, getKernelNameFromUrl(url)))
 
 def cleanupFile(path):
     """Delete a file from the given path
