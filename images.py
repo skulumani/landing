@@ -7,8 +7,8 @@ import spiceypy as spice
 
 import sys
 import os
-import urlparse
-import urllib2
+import urllib.parse
+import urllib.request
 import time
 
 import pdb
@@ -51,31 +51,29 @@ class NearImages(object):
                 headers = {"User-Agent": ("Mozilla/5.0 (X11; Linux x86_64)"
                         " AppleWebKit/537.36 (KHTML, like Gecko)"
                         " Chrome/58.0.3029.110 Safari/537.36")}
-                ii = 0
-                request = urllib2.Request(url, None, headers)
-                html = urllib2.urlopen(request)
-                soup = BeautifulSoup(html.read(), 'lxml')
-                
-                for tag in soup.findAll('a', href=True):
-                    href_url = urlparse.urljoin(url, tag['href'])
-                    ext = os.path.splitext(os.path.basename(href_url))[1]
-                    if ext == '.fit' or ext == '.lbl':
-                        current = urllib2.urlopen(href_url)
+                with urllib.request.urlopen(url) as response:
+                    ii = 0
+                    html = response.read() 
+                    soup = BeautifulSoup(html, 'lxml')
+                    
+                    for tag in soup.findAll('a', href=True):
+                        href_url = urllib.parse.urljoin(url, tag['href'])
+                        ext = os.path.splitext(os.path.basename(href_url))[1]
                         local_filename = os.path.basename(href_url)
                         local_filepath = os.path.join(path, local_filename)
-
-                        if not os.path.isfile(local_filepath):                
-                            print("Downloading: {}".format(local_filename))
-                            f = open(local_filepath, 'wb')
-                            f.write(current.read())
-                            f.close()
-                            ii = ii + 1
-                        else:
-                            print("Skipping: {}".format(local_filename))
-                    
-                print("Download {} files".format(ii))
-                print("All Images from day {0} of {1} should be present".format(
-                    day, year))
+                        if ext == '.fit' or ext == '.lbl':
+                            with urllib.request.urlopen(href_url) as current:
+                                if not os.path.isfile(local_filepath):                
+                                    print("Downloading: {}".format(local_filename))
+                                    with open(local_filepath, 'wb') as f:
+                                        f.write(current.read())
+                                    ii = ii + 1
+                                else:
+                                    print("Skipping: {}".format(local_filename))
+                        
+                    print("Download {} files".format(ii))
+                    print("All Images from day {0} of {1} should be present".format(
+                        day, year))
             except KeyboardInterrupt:
                 print("Stopping the download process")
         
