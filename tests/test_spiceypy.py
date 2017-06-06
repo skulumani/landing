@@ -5,10 +5,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import spiceypy as spice
 import numpy as np
 from urllib import urlretrieve
+import sys
 import os
 import pdb
 
 from .. import kernels
+
+def test_correct_enviornment_loaded():
+    opencv_envl = '/home/shankar/anaconda3/envs/opencv'
+    np.testing.assert_equal(sys.prefix, opencv_envl)
+
 def test_spiceypy_installation_correct():
     spice_version = 'CSPICE_N0065'
     np.testing.assert_equal(spice.tkvrsn('TOOLKIT'),spice_version)
