@@ -52,7 +52,10 @@ class NearKernels(object):
         self.eros_body_frame_id = 2000433
 
         self.inertial_frame = 'J2000'
-        
+            
+        # mission start from near_171.tsc in UTC
+        self.start_utc ="1996-02-17T20:43:29"
+
         self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0008.tls'
         self.Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ck/near_20010101_20010228_v01.bc'
         self.Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/sclk/near_171.tsc'
