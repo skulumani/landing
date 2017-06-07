@@ -92,7 +92,8 @@ class NearImages(object):
         self.filename_key = 'NEAR-003'
         
 
-        # first element is the scalar. quat_key
+        # first element is the scalar. quat_key. Converts from the inertial
+        # frame to the space craft frame
         self.quat_key = ['NEAR-019', 'NEAR-020', 'NEAR-021', 'NEAR-022']
 
         # position vectors from fits file
@@ -125,7 +126,7 @@ class NearImages(object):
                     'path': os.path.join(self.path, f),
                     'filename': header[self.filename_key],
                     'order': ii,
-                    'quat': [header[x] for x in self.quat_key],
+                    'quat_i2b': [header[x] for x in self.quat_key],
                     'met_start': header[self.metstart_key],
                     'met_mid': header[self.metmid_key],
                     'et': near.start_et + header[self.metmid_key],
@@ -147,6 +148,17 @@ class NearImages(object):
                     }
 
             # compute the spice data at this time stamp using ET, or SCLK
+            image_data.update({
+                'spice_inertial_sun_pos': spice.spkezp(int(near.near_id),
+                    image_data['et'], near.inertial_frame, 
+                    'LT+S', int(image_data['inertial_pos_origin'])),
+                'spice_inertial_target_pos': spice.spkezp(int(near.near_id),
+                    image_data['et'], near.inertial_frame, 'LT+S',
+                    near.bodies['EROS']),
+                'spice_R_i2b': spice.pxform(near.inertial_frame,
+                    near.near_body_frame, image_data['et'])
+                })
+
             self.images.append(image_data)
         
         spice.kclear()
