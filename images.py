@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from astropy.io import fits
 import spiceypy as spice
+import numpy as np
 
 import sys
 import os
@@ -139,24 +140,36 @@ class NearImages(object):
                     'telescope_temp': header[self.teltemp_key],
                     'ccd_temp': header[self.ccdtemp_key],
                     'inertial_pos_origin': self.pos_origin_id,
-                    'inertial_sun_pos': [header[x] for x in self.pos_sun_key],
-                    'inertial_target_pos': [header[x] for x in
-                        self.target_key],
+                    'inertial_sun_pos': np.array(
+                        [header[x] for x in self.pos_sun_key]),
+                    'inertial_target_pos':np.array([header[x] for x in
+                        self.target_key]),
                     'target_center_id': header[self.target_spice_id_key],
                     'target_name': header[self.target_name_key],
                     'slant_dist': header[self.slant_dist_key]
                     }
 
             # compute the spice data at this time stamp using ET, or SCLK
-            image_data.update({
-                'spice_inertial_sun_pos': spice.spkezp(int(near.near_id),
-                    image_data['et'], near.inertial_frame, 
-                    'LT+S', int(image_data['inertial_pos_origin'])),
-                'spice_inertial_target_pos': spice.spkezp(int(near.near_id),
+            spice_inertial_target_pos, _ = spice.spkezp(int(near.bodies['EROS']),
                     image_data['et'], near.inertial_frame, 'LT+S',
-                    near.bodies['EROS']),
+                    int(image_data['inertial_pos_origin']))
+            spice_inertial_sun_pos, _ = spice.spkezp(int(near.near_id),
+                    image_data['et'], near.inertial_frame, 'LT+S',
+                    int(image_data['inertial_pos_origin']))
+            inertial_eros2sc_pos = (image_data['inertial_sun_pos'] - 
+                    image_data['inertial_target_pos'])
+            spice_inertial_eros2sc_pos, _ = spice.spkezp(int(near.near_id),
+                    image_data['et'], near.inertial_frame, 'LT+S',
+                    near.bodies['EROS'])
+                
+            image_data.update({
+                'spice_inertial_sun_pos': np.array(spice_inertial_sun_pos),
+                'spice_inertial_target_pos': np.array(spice_inertial_target_pos),
                 'spice_R_i2b': spice.pxform(near.inertial_frame,
-                    near.near_body_frame, image_data['et'])
+                    near.near_body_frame, image_data['et']),
+                'inertial_eros2sc_pos': np.array(inertial_eros2sc_pos),
+                'spice_inertial_eros2sc_pos': np.array(
+                    spice_inertial_eros2sc_pos)
                 })
 
             self.images.append(image_data)
