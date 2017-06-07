@@ -28,7 +28,7 @@ class NearImages(object):
     """Class that holds all the image data for Near landing
     """
 
-    def __init__(self, year='2001', day='043', downloaded=False):
+    def __init__(self, near,  year='2001', day='043', downloaded=False):
         """Download all the MSI imagery from a specific day of flight
 
         This function will download all the MSI imagery from 
@@ -104,6 +104,7 @@ class NearImages(object):
         self.target_name_key = 'NEAR-047' 
         self.slant_dist_key = 'NEAR-057'
 
+        self.extract_image_data(near)
     def extract_image_data(self, near, image=''):
         """Extract image data from the Fits
         """
