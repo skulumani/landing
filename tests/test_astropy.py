@@ -23,7 +23,8 @@ def test_astropy_installed():
 class TestNEARFitsImages():
     # make sure all the images are downloaded
     near = kernels.NearKernels()
-    images = images.NearImages()
+    near_images = images.NearImages()
+    near_images.extract_image_data(near)
     image_path = os.path.join(cwd, '../images')
 
     test_image = 'm0157353946f4_2p_iof_dbl.fit'
@@ -31,16 +32,15 @@ class TestNEARFitsImages():
     keys = hdulist[0].header.keys()
     hdulist.close()
 
-
     def test_all_landing_images_same_header(self):
-        for f in self.fit_files:
+        for f in self.near_images.fits:
             data = fits.open(os.path.join(self.image_path, f))
             img_keys = data[0].header.keys()
             data.close()
             np.testing.assert_equal(img_keys, self.keys)
 
     def test_all_images_same_size(self):
-        for f in self.fit_files:
+        for f in self.near_images.fits:
             data = fits.open(os.path.join(self.image_path, f))
             header = data[0].header
             data.close()

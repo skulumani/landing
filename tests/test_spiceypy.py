@@ -4,7 +4,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import spiceypy as spice
 import numpy as np
-from urllib import urlretrieve
 import sys
 import os
 import pdb
@@ -12,7 +11,7 @@ import pdb
 from .. import kernels
 
 def test_correct_enviornment_loaded():
-    opencv_envl = '/home/shankar/anaconda3/envs/opencv'
+    opencv_envl = '/home/shankar/anaconda3/envs/asteroid'
     np.testing.assert_equal(sys.prefix, opencv_envl)
 
 def test_spiceypy_installation_correct():
@@ -27,8 +26,7 @@ class TestSpiceyPyFunctions():
     etOne = spice.str2et(utc[0])
     etTwo = spice.str2et(utc[1])
     step = 4000
-
-    times = [x*(etTwo-etOne)/step + etOne for x in range(step)]
+    times = np.linspace(etOne, etTwo, step) 
 
     def test_spiceypy_cassini(self):
         true_initial_pos = [-5461446.61080924 ,-4434793.40785864 ,-1200385.93315424]
