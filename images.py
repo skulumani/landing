@@ -87,10 +87,22 @@ class NearImages(object):
         self.expms_key = 'NEAR-010'
         self.teltemp_key = 'NEAR-015'
         self.ccdtemp_key = 'NEAR-016'
-        self.sclkstart_key = 'NEAR-017'
-        self.sclkmid_key = 'NEAR-018'
+        self.metstart_key = 'NEAR-017'
+        self.metmid_key = 'NEAR-018'
+        self.filename_key = 'NEAR-003'
+        
+
         # first element is the scalar. quat_key
         self.quat_key = ['NEAR-019', 'NEAR-020', 'NEAR-021', 'NEAR-022']
+
+        # position vectors from fits file
+        self.pos_origin_id = '10' # sun or maybe solar system barycenter 
+        self.pos_sun_key = ['NEAR-023', 'NEAR-024', 'NEAR-025']
+        self.target_key = ['NEAR-027','NEAR-028', 'NEAR-029']
+        self.target_center_key = 'NEAR-030'
+        self.target_spice_id_key = 'NEAR-046'
+        self.target_name_key = 'NEAR-047' 
+        self.slant_dist_key = 'NEAR-057'
 
     def extract_image_data(self, near, image=''):
         """Extract image data from the Fits
@@ -110,18 +122,30 @@ class NearImages(object):
             image_data = {'image': image_data,
                     'header': header,
                     'path': os.path.join(self.path, f),
+                    'filename': header[self.filename_key],
                     'order': ii,
                     'quat': [header[x] for x in self.quat_key],
-                    'met_sec': header[self.sclkmid_key],
-                    'et': spice.sct2e(int(near.near_id), 
-                        header[self.sclkmid_key]),
-                    'utc': spice.timout(spice.sct2e(int(near.near_id), 
-                        header[self.sclkmid_key]),
-                        'YYYY MON DD HR:MN:SC.#### (TDB) ::TDB'),
+                    'met_start': header[self.metstart_key],
+                    'met_mid': header[self.metmid_key],
+                    'et': near.start_et + header[self.metmid_key],
+                    'sclk': spice.sce2c(int(near.near_id), near.start_et +
+                        header[self.metmid_key]),
+                    'utc': spice.timout(near.start_et +
+                        header[self.metmid_key],
+                        'YYYY MON DD HR:MN:SC.#### (UTC) ::UTC'),
                     'exposure': header[self.expms_key],
                     'telescope_temp': header[self.teltemp_key],
-                    'ccd_temp': header[self.ccdtemp_key]
+                    'ccd_temp': header[self.ccdtemp_key],
+                    'inertial_pos_origin': self.pos_origin_id,
+                    'inertial_sun_pos': [header[x] for x in self.pos_sun_key],
+                    'inertial_target_pos': [header[x] for x in
+                        self.target_key],
+                    'target_center_id': header[self.target_spice_id_key],
+                    'target_name': header[self.target_name_key],
+                    'slant_dist': header[self.slant_dist_key]
                     }
+
+            # compute the spice data at this time stamp using ET, or SCLK
             self.images.append(image_data)
         
         spice.kclear()
