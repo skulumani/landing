@@ -124,6 +124,8 @@ class NearKernels(object):
         getKernels(self)
         self.metakernel = writeMetaKernel(self, 'near2001.tm')
 
+        self.info()
+
     def info(self):
         """Read and Output info about the loaded kernels
         """
@@ -188,10 +190,10 @@ class CassiniKernels(object):
         self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
         self.Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/sclk/cas00171.tsc'
         self.Pck_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/pck/cpck09May2017.tpc'
-        self.Fk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v40.tf'
+        self.Fk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/fk/release.11/cas_v37.tf'
         self.Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ck/04135_04171pc_psiv2.bc'
         self.Spk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/981005_PLTEPH-DE405S.bsp'
-        self.Ik_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v10.ti'
+        self.Ik_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v09.ti'
         self.TourSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp'
         self.satSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp'
         
@@ -242,7 +244,7 @@ def attemptDownload(url, kernelName, targetFileName, num_attempts=5):
         time.sleep(2 + current_attempt)
 
     if current_attempt >= num_attempts:
-        raise BadException("Error downloading kernel: {}. Check if it exists at url: {}".format(kernelName, url))
+        print("Error downloading kernel: {}. Check if it exists at url: {}".format(kernelName, url))
 
 
 def getKernels(kernelObj=CassiniKernels):
