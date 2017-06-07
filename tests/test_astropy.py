@@ -23,21 +23,12 @@ def test_astropy_installed():
 class TestNEARFitsImages():
     # make sure all the images are downloaded
     near = kernels.NearKernels()
-    near_images = images.NearImages()
-    near_images.extract_image_data(near)
+    near_images = images.NearImages(near)
     image_path = os.path.join(cwd, '../images')
 
-    test_image = 'm0157353946f4_2p_iof_dbl.fit'
-    hdulist = fits.open(os.path.join(image_path, test_image))
-    keys = hdulist[0].header.keys()
-    hdulist.close()
-
-    def test_all_landing_images_same_header(self):
-        for f in self.near_images.fits:
-            data = fits.open(os.path.join(self.image_path, f))
-            img_keys = data[0].header.keys()
-            data.close()
-            np.testing.assert_equal(img_keys, self.keys)
+    # keys to test for
+    xaxis_key = 'NAXIS1'
+    yaxis_key = 'NAXIS2'
 
     def test_all_images_same_size(self):
         for f in self.near_images.fits:
@@ -48,23 +39,12 @@ class TestNEARFitsImages():
             np.testing.assert_equal(header[self.xaxis_key], 537)
             np.testing.assert_equal(header[self.yaxis_key], 244)
 
-   # def test_inertial_state_against_spice(self):
-   #     """Compare the state between the image and spice
-   #     """
-   #     spice.furnsh(self.near.metakernel)
-   #     for f in self.fit_files:
-   #         data = fits.open(os.path.join(self.image_path, f))
-   #         header = data[0].header
-   #         data.close()
-   #         quat_fits = [header[x] for x in self.quat_key]
-   #         sclk = header[self.sclkmid_key]
-   #         et = spice.sct2e(int(self.near.near_id), sclk)
-   #         
-   #         pdb.set_trace()
-   #         Ri2b_fits = spice.q2m(quat_fits)
-   #         # get teh quaternion from teh kernels
-   #         Ri2b_spice = spice.pxform(self.near.inertial_frame, 
-   #                 self.near.near_body_frame, et)
-   #         np.testing.assert_array_almost_equal(Ri2b_fits, Ri2b_spice)
+    def test_fits_image_attitude_compared_to_spice(self):
+        spice.furnsh(self.near.metakernel)
+        pdb.set_trace()
+        for image in self.near_images.images:
+            R_i2b_fits = spice.q2m(image['quat_i2b'])
+            R_i2b_spice = image['spice_R_i2b']
+            np.testing.assert_array_almost_equal(R_i2b_fits, R_i2b_spice, 
+                    decimal=1)
 
-   #     spice.kclear()
