@@ -146,3 +146,7 @@ def astropy_fits():
     plt.colorbar()
     plt.show()
 
+def near_landing_images():
+    """Plot the positions of NEAR during image capture
+    """
+
