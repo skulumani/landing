@@ -27,21 +27,26 @@ class TestSpiceyPyFunctions():
     etTwo = spice.str2et(utc[1])
     step = 4000
     times = np.linspace(etOne, etTwo, step) 
-
+    spice.kclear()
     def test_spiceypy_cassini(self):
+        spice.furnsh(self.cass.metakernel)
         true_initial_pos = [-5461446.61080924 ,-4434793.40785864 ,-1200385.93315424]
         positions, lightTimes = spice.spkpos('Cassini', self.times, 'J2000', 'None', 'SATURN BARYCENTER')
         np.testing.assert_array_almost_equal(positions[0], true_initial_pos)
+        spice.kclear()
 
     def test_spicepy_rotation_matrix_identity(self):
+        spice.furnsh(self.cass.metakernel)
         R_E2E = spice.pxform('IAU_EARTH', 'IAU_EARTH', self.etOne)
         np.testing.assert_array_almost_equal(R_E2E, np.eye(3))
-
+        spice.kclear()
     def test_spicepy_state_transformation(self):
+        spice.furnsh(self.cass.metakernel)
         T = spice.sxform('IAU_EARTH', 'IAU_SATURN', self.etOne)
         R = spice.pxform('IAU_EARTH', 'IAU_SATURN', self.etOne)
         (Rout, wout) = spice.xf2rav(T)
         np.testing.assert_array_almost_equal(Rout, R)
+        spice.kclear()
 
 class TestNEARKernels():
     near = kernels.NearKernels()
