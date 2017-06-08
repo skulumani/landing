@@ -155,17 +155,42 @@ def near_landing_images():
     spice.furnsh(near.metakernel)
 
     ettimes = [image['et'] for image in near_images.images] 
+    times = np.linspace(ettimes[0], ettimes[-1], 1000)
+
     spice_inertial_eros2sc_pos = np.squeeze([image['spice_inertial_eros2sc_pos']
             for image in near_images.images])
     inertial_eros2sc_pos = np.squeeze([image['inertial_eros2sc_pos'] for image
         in near_images.images])
+    
+    A = np.array([[34.2/2, 0, 0],[0, 11.2/2, 0], [0, 0, 11.2/2]])
+    C = np.array([0, 0, 0])
+    U, s, rotation = np.linalg.svd(A)
+    radii = s 
+
+    u = np.linspace(0.0, 2.0 * np.pi, 100)
+    v = np.linspace(0.0, np.pi, 100)
+    x = radii[0] * np.outer(np.cos(u), np.sin(v))
+    y = radii[1] * np.outer(np.sin(u), np.sin(v))
+    z = radii[2] * np.outer(np.ones_like(u), np.cos(v))
+    
+    for i in range(len(x)):
+        for j in range(len(x)):
+            [x[i,j], y[i,j], z[i,j]] = (np.dot([x[i,j], y[i,j], z[i,j]],
+                    rotation) +C)
+    istate = np.zeros((1000, 3))
+    for ii, et in enumerate(times):
+        istate[ii,:], _ = spice.spkezp(int(near.near_id), et,
+                near.inertial_frame, 'None', int(near.eros_id))
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color='b', alpha=0.2)
     ax.scatter(spice_inertial_eros2sc_pos[:,0],spice_inertial_eros2sc_pos[:,1],
-            spice_inertial_eros2sc_pos[:,2], color='blue')
+            spice_inertial_eros2sc_pos[:,2], color='blue', label='SPICE')
     ax.scatter(inertial_eros2sc_pos[:, 0], inertial_eros2sc_pos[:, 1],
-            inertial_eros2sc_pos[:, 2], color='red')
+            inertial_eros2sc_pos[:, 2], color='red', label='FITS')
+    ax.plot(istate[:,0], istate[:,1], istate[:,2], label='Trajectory')
+    plt.legend()
     plt.show()
 
     spice.kclear()
