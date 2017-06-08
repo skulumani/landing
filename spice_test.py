@@ -18,7 +18,7 @@ import os
 import numpy as np
 import pdb
 
-from . import kernels
+from . import kernels, images
 
 def near_state():
     near = kernels.NearKernels()
@@ -149,4 +149,25 @@ def astropy_fits():
 def near_landing_images():
     """Plot the positions of NEAR during image capture
     """
+    near = kernels.NearKernels()
+    near_images = images.NearImages(near=near, downloaded=True)
+
+    spice.furnsh(near.metakernel)
+
+    ettimes = [image['et'] for image in near_images.images] 
+    spice_inertial_eros2sc_pos = np.squeeze([image['spice_inertial_eros2sc_pos']
+            for image in near_images.images])
+    inertial_eros2sc_pos = np.squeeze([image['inertial_eros2sc_pos'] for image
+        in near_images.images])
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(spice_inertial_eros2sc_pos[:,0],spice_inertial_eros2sc_pos[:,1],
+            spice_inertial_eros2sc_pos[:,2], color='blue')
+    ax.scatter(inertial_eros2sc_pos[:, 0], inertial_eros2sc_pos[:, 1],
+            inertial_eros2sc_pos[:, 2], color='red')
+    plt.show()
+
+    spice.kclear()
+
 
