@@ -17,7 +17,7 @@ cwd = os.path.realpath(os.path.dirname(__file__))
 
 
 def test_astropy_installed():
-    np.testing.assert_equal(astropy.__version__, '1.3.3')
+    np.testing.assert_equal(astropy.__version__, '2.0.2')
 
 
 class TestNEARFitsImages():
